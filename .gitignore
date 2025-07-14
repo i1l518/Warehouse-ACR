@@ -74,4 +74,7 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 
+#Firebase key
+Firebase/amr-database-c3699-firebase-adminsdk-fbsvc-ae043dca98.json
+
 # End of https://www.toptal.com/developers/gitignore/api/unity
