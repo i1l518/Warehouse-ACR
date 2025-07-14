@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "31656812424",
+    "firebase_url": "https://amr-database-c3699-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "amr-database-c3699",
+    "storage_bucket": "amr-database-c3699.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:31656812424:android:aa4da1eabab2c98431e43d",
+        "android_client_info": {
+          "package_name": "com.Data.AMR_Database"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB3UWC0p2rz3770BxwSyV9rGqQ5hZsjhsc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
