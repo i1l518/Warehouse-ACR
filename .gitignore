@@ -78,3 +78,27 @@ crashlytics-build.properties
 Firebase/amr-database-c3699-firebase-adminsdk-fbsvc-ae043dca98.json
 
 # End of https://www.toptal.com/developers/gitignore/api/unity
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dev-debug.log
+# Dependency directories
+node_modules/
+# Environment variables
+.env
+# Editor directories and files
+.idea
+.vscode
+*.ntvs*
+*.njsproj
+*.sw?
+# OS specific
+.DS_Store
+
+# Task files
+# tasks.json
+# tasks/ 
