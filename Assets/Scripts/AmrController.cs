@@ -1,10 +1,10 @@
 using Firebase.Firestore;
 using System;
-using UnityEngine;
-using UnityEngine.AI;
-using System.Threading.Tasks;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using UnityEngine;
+using UnityEngine.AI;
 
 [RequireComponent(typeof(NavMeshAgent))]
 public class AmrController : MonoBehaviour
@@ -28,6 +28,7 @@ public class AmrController : MonoBehaviour
     private DocumentReference amrDocRef;
     private ListenerRegistration listener;
     private bool isWorking = false;
+    private string currentTaskId;
 
     //================================================================
     // 1. Unity 생명주기 함수들
@@ -218,6 +219,9 @@ public class AmrController : MonoBehaviour
                         yield return new WaitUntil(() => placeTask.IsCompleted);
                         Debug.Log($"[{amrId}] 물건을 놓습니다... ({placeItemDuration}초 대기)");
                         yield return new WaitForSeconds(placeItemDuration);
+
+                        string rackId = GetValueFromMap(destMap, "rackId");
+                        ACREvents.RaiseOnItemPlaced(this.amrId, this.currentTaskId, rackId);
                     }
                 }
             }
@@ -264,6 +268,10 @@ public class AmrController : MonoBehaviour
                 yield return new WaitUntil(() => pickupTask.IsCompleted);
                 Debug.Log($"[{amrId}] 물건을 줍습니다... ({pickupItemDuration}초 대기)");
                 yield return new WaitForSeconds(pickupItemDuration);
+
+                string rackId = GetValueFromMap(sourceMap, "rackId");
+
+                ACREvents.RaiseOnItemPickedUp(this.amrId, this.currentTaskId, rackId);
 
                 // 3. 지정된 출고 구역(destinationStationId)으로 이동
                 if (taskData.TryGetValue("destinationStationId", out object stationIdObj))
@@ -313,8 +321,21 @@ public class AmrController : MonoBehaviour
     //================================================================
     // 5. 헬퍼(Helper) 함수들
     //================================================================
+
+    private string GetValueFromMap(Dictionary<string, object> dataMap, string key)
+    {
+        if (dataMap.TryGetValue(key, out object valueObj))
+        {
+            return valueObj.ToString();
+        }
+        return string.Empty;
+    }
+
     private async Task CompleteTask(DocumentReference taskDocRef)
     {
+        // <<<--- 변경된 부분: 랙 상태 업데이트 로직 제거 ---
+        // 이 함수는 이제 Task와 Amr 자신의 상태만 업데이트하는 책임만 가집니다.
+
         await amrDocRef.UpdateAsync("assignedTask", null);
 
         Dictionary<string, object> taskUpdate = new Dictionary<string, object>
@@ -323,6 +344,7 @@ public class AmrController : MonoBehaviour
             { "completedAt", Timestamp.GetCurrentTimestamp() }
         };
         await taskDocRef.UpdateAsync(taskUpdate);
+
         Debug.Log($"[{amrId}] Task '{taskDocRef.Id}' 완료 보고.");
     }
 
