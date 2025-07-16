@@ -139,6 +139,47 @@ public class CentralControlSystem : MonoBehaviour
         DocumentReference newTaskRef = createTask.Result;
         Debug.Log($"Task 생성 완료: {newTaskRef.Id}. 이제 유휴 ACR을 탐색합니다.");
 
-        // TODO: 유휴 ACR을 찾아 이 Task ID를 assignedTask에 업데이트하는 로직 추가
+        // =================================================================
+        // 6. 유휴 ACR 탐색 및 Task 할당
+        // =================================================================
+
+        // 6-1. 'idle' 상태인 모든 ACR을 Firestore에서 조회
+        Query idleAmrQuery = db.Collection("amrs").WhereEqualTo("status", "idle");
+        Task<QuerySnapshot> getIdleAmrsTask = idleAmrQuery.GetSnapshotAsync();
+        yield return new WaitUntil(() => getIdleAmrsTask.IsCompleted);
+
+        if (getIdleAmrsTask.IsFaulted)
+        {
+            Debug.LogError("유휴 ACR 조회 실패!");
+            // TODO: 생성된 Task를 '실패' 상태로 만들거나, 랙을 다시 'empty'로 복구하는 로직 필요
+            yield break;
+        }
+
+        QuerySnapshot idleAmrsSnapshot = getIdleAmrsTask.Result;
+        if (idleAmrsSnapshot.Count == 0)
+        {
+            Debug.LogWarning("현재 가용한 유휴 ACR이 없습니다. Task가 대기 상태로 유지됩니다.");
+            // 이 경우, Task의 status는 'pending'으로 남아있게 되며,
+            // 나중에 ACR이 'idle'이 되었을 때 이 Task를 다시 할당해주는 별도의 로직이 필요함 (고급 기능)
+            yield break;
+        }
+
+        // 6-2. 최적의 ACR 선정 (여기서는 가장 첫 번째 유휴 ACR을 선택)
+        // TODO: 더 복잡한 로직 추가 가능 (예: 배터리 잔량이 가장 높은 ACR, 현재 위치에서 가장 가까운 ACR 등)
+        DocumentSnapshot selectedAmrDoc = idleAmrsSnapshot.Documents.First();
+        Debug.Log($"최적 ACR 선정: {selectedAmrDoc.Id}");
+
+        // 6-3. 선택된 ACR에게 Task 할당
+        Task assignTask = selectedAmrDoc.Reference.UpdateAsync("assignedTask", newTaskRef.Id);
+        yield return new WaitUntil(() => assignTask.IsCompleted);
+
+        if (assignTask.IsFaulted)
+        {
+            Debug.LogError($"ACR '{selectedAmrDoc.Id}'에게 Task 할당 실패!");
+            // TODO: 복구 로직
+            yield break;
+        }
+
+        Debug.Log($"성공적으로 ACR '{selectedAmrDoc.Id}'에게 Task '{newTaskRef.Id}'를 할당했습니다.");
     }
 }

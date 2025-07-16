@@ -161,7 +161,7 @@ public class AmrController : MonoBehaviour
             if (pickupTransform != null)
             {
                 Vector3 directionToPickup = (pickupTransform.position - transform.position).normalized;
-                // 방향 벡터가 거의 0이면 (이미 그 위치에 매우 가깝다면) 회전하지 않음
+                  
                 if (directionToPickup.sqrMagnitude > 0.001f)
                 {
                     float targetYAngle = Quaternion.LookRotation(directionToPickup).eulerAngles.y;
